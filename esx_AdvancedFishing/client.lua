@@ -31,38 +31,43 @@ local correct = 0
 
 local bait = "none"
 
-local blip = AddBlipForCoord(Config.SellFish.x, Config.SellFish.y, Config.SellFish.z)
-
+Citizen.CreateThread(function()
+	if Config.UseFishBlip then
+		local blip = AddBlipForCoord(Config.FishBlip.Coords)
 			SetBlipSprite (blip, 356)
 			SetBlipDisplay(blip, 4)
 			SetBlipScale  (blip, 1.1)
 			SetBlipColour (blip, 17)
 			SetBlipAsShortRange(blip, true)
 			BeginTextCommandSetBlipName("STRING")
-			AddTextComponentString("Fish selling")
+			AddTextComponentString("Fish Market")
 			EndTextCommandSetBlipName(blip)
-			
-local blip2 = AddBlipForCoord(Config.SellTurtle.x, Config.SellTurtle.y, Config.SellTurtle.z)
+	end
 
+	if Config.UseTurtleBlip then
+		local blip2 = AddBlipForCoord(Config.TurtleBlip.Coords)
 			SetBlipSprite (blip2, 68)
 			SetBlipDisplay(blip2, 4)
 			SetBlipScale  (blip2, 0.9)
 			SetBlipColour (blip2, 49)
 			SetBlipAsShortRange(blip2, true)
 			BeginTextCommandSetBlipName("STRING")
-			AddTextComponentString("Sea Turtle dealer")
+			AddTextComponentString("Sea Turtle Dealer")
 			EndTextCommandSetBlipName(blip2)
-			
-local blip3 = AddBlipForCoord(Config.SellShark.x, Config.SellShark.y, Config.SellShark.z)
+	end
 
+	if Config.UseSharkBlip then
+		local blip3 = AddBlipForCoord(Config.SharkBlip.Coords)
 			SetBlipSprite (blip3, 68)
 			SetBlipDisplay(blip3, 4)
 			SetBlipScale  (blip3, 0.9)
 			SetBlipColour (blip3, 49)
 			SetBlipAsShortRange(blip3, true)
 			BeginTextCommandSetBlipName("STRING")
-			AddTextComponentString("Shark meat dealer")
+			AddTextComponentString("Shark Dealer")
 			EndTextCommandSetBlipName(blip3)
+	end
+end)
 			
 for _, info in pairs(Config.MarkerZones) do
 		info.blip = AddBlipForCoord(info.x, info.y, info.z)
@@ -72,7 +77,7 @@ for _, info in pairs(Config.MarkerZones) do
 		SetBlipColour(info.blip, 20)
 		SetBlipAsShortRange(info.blip, true)
 		BeginTextCommandSetBlipName("STRING")
-		AddTextComponentString("Boat rental")
+		AddTextComponentString("Boat Rental")
 		EndTextCommandSetBlipName(info.blip)
 	end
 	
@@ -188,9 +193,9 @@ Citizen.CreateThread(function()
 	while true do
 		Wait(1)
 		
-		DrawMarker(1, Config.SellFish.x, Config.SellFish.y, Config.SellFish.z , 0.0, 0.0, 0.0, 0, 0.0, 0.0, 3.0, 3.0, 2.0, 0, 70, 250, 30, false, true, 2, false, false, false, false)
-		DrawMarker(1, Config.SellTurtle.x, Config.SellTurtle.y, Config.SellTurtle.z , 0.0, 0.0, 0.0, 0, 0.0, 0.0, 3.0, 3.0, 2.0, 0, 70, 250, 30, false, true, 2, false, false, false, false)
-		DrawMarker(1, Config.SellShark.x, Config.SellShark.y, Config.SellShark.z, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 3.0, 3.0, 2.0, 0, 70, 250, 30, false, true, 2, false, false, false, false)
+		DrawMarker(1, Config.SellFish.x, Config.SellFish.y, Config.SellFish.z , 0.0, 0.0, 0.0, 0, 0.0, 0.0, 3.0, 3.0, 2.0, 0, 70, 250, 100, false, true, 2, false, false, false, false)
+		DrawMarker(1, Config.SellTurtle.x, Config.SellTurtle.y, Config.SellTurtle.z , 0.0, 0.0, 0.0, 0, 0.0, 0.0, 2.0, 2.0, 0, 1.0, 70, 250, 100, false, true, 2, false, false, false, false)
+		DrawMarker(27, Config.SellShark.x, Config.SellShark.y, Config.SellShark.z, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 2.0, 2.0, 2.0, 0, 70, 250, 100, false, true, 2, false, false, false, false)
 	end
 end)
 
@@ -240,9 +245,6 @@ end)
 
 RegisterNetEvent('fishing:fishstart')
 AddEventHandler('fishing:fishstart', function()
-	
-	
-	
 	playerPed = GetPlayerPed(-1)
 	local pos = GetEntityCoords(GetPlayerPed(-1))
 	print('started fishing' .. pos)
@@ -293,11 +295,22 @@ function OpenBoatsMenu(x, y , z)
 		table.insert(elements, {label = '<span style="color:green;">Jetmax</span> <span style="color:red;">4500$</span>', value = 'boat5'}) 	
 		table.insert(elements, {label = '<span style="color:green;">Toro</span> <span style="color:red;">5500$</span>', value = 'boat2'}) 
 		table.insert(elements, {label = '<span style="color:green;">Marquis</span> <span style="color:red;">6000$</span>', value = 'boat3'}) 
-		table.insert(elements, {label = '<span style="color:green;">Tug boat</span> <span style="color:red;">7500$</span>', value = 'boat4'})
 		
 	--If user has police job they will be able to get free Police Predator boat
 	if PlayerData.job.name == "police" then
 		table.insert(elements, {label = '<span style="color:green;">Police Predator</span>', value = 'police'})
+	end
+	
+	if PlayerData.job.name == "police" then
+		table.insert(elements, {label = '<span style="color:green;">CG Predator</span>', value = 'police'})
+	end
+	
+	if PlayerData.job.name == "police" then
+		table.insert(elements, {label = '<span style="color:green;">CG Dinghy</span>', value = 'police'})
+	end
+	
+	if PlayerData.job.name == "police" then
+		table.insert(elements, {label = '<span style="color:green;">CG Executioner</span>', value = 'police'})
 	end
 	
 	ESX.UI.Menu.CloseAll()
@@ -306,7 +319,7 @@ function OpenBoatsMenu(x, y , z)
     'default', GetCurrentResourceName(), 'client',
     {
 		title    = 'Rent a boat',
-		align    = 'bottom-right',
+		align    = 'top-right',
 		elements = elements,
     },
 	
@@ -317,7 +330,7 @@ function OpenBoatsMenu(x, y , z)
 		ESX.UI.Menu.CloseAll()
 
 		TriggerServerEvent("fishing:lowmoney", 2500) 
-		TriggerEvent("chatMessage", 'You rented a boat for', {255,0,255}, '$' .. 2500)
+		ESX.ShowNotification('You rented a boat for', {255,0,255}, '$' .. 2500)
 		SetPedCoordsKeepVehicle(ped, x, y , z)
 		TriggerEvent('esx:spawnVehicle', "dinghy4")
 	end
@@ -326,7 +339,7 @@ function OpenBoatsMenu(x, y , z)
 		ESX.UI.Menu.CloseAll()
 
 		TriggerServerEvent("fishing:lowmoney", 5500) 
-		TriggerEvent("chatMessage", 'You rented a boat for', {255,0,255}, '$' .. 5500)
+		ESX.ShowNotification('You rented a boat for', {255,0,255}, '$' .. 5500)
 		SetPedCoordsKeepVehicle(ped, x, y , z)
 		TriggerEvent('esx:spawnVehicle', "TORO")
 	end
@@ -335,7 +348,7 @@ function OpenBoatsMenu(x, y , z)
 		ESX.UI.Menu.CloseAll()
 
 		TriggerServerEvent("fishing:lowmoney", 6000) 
-		TriggerEvent("chatMessage", 'You rented a boat for', {255,0,255}, '$' .. 6000)
+		ESX.ShowNotification('You rented a boat for', {255,0,255}, '$' .. 6000)
 		SetPedCoordsKeepVehicle(ped, x, y , z)
 		TriggerEvent('esx:spawnVehicle', "MARQUIS")
 	end
@@ -344,7 +357,7 @@ function OpenBoatsMenu(x, y , z)
 		ESX.UI.Menu.CloseAll()
 
 		TriggerServerEvent("fishing:lowmoney", 7500) 
-		TriggerEvent("chatMessage", 'You rented a boat for', {255,0,255}, '$' .. 7500)
+		ESX.ShowNotification('You rented a boat for', {255,0,255}, '$' .. 7500)
 		SetPedCoordsKeepVehicle(ped, x, y , z)
 		TriggerEvent('esx:spawnVehicle', "tug")
 	end
@@ -353,7 +366,7 @@ function OpenBoatsMenu(x, y , z)
 		ESX.UI.Menu.CloseAll()
 
 		TriggerServerEvent("fishing:lowmoney", 4500) 
-		TriggerEvent("chatMessage", 'You rented a boat for', {255,0,255}, '$' .. 4500)
+		ESX.ShowNotification('You rented a boat for', {255,0,255}, '$' .. 4500)
 		SetPedCoordsKeepVehicle(ped, x, y , z)
 		TriggerEvent('esx:spawnVehicle', "jetmax")
 	end
@@ -362,7 +375,7 @@ function OpenBoatsMenu(x, y , z)
 		ESX.UI.Menu.CloseAll()
 
 		TriggerServerEvent("fishing:lowmoney", 3500) 
-		TriggerEvent("chatMessage", 'You rented a boat for', {255,0,255}, '$' .. 3500)
+		ESX.ShowNotification('You rented a boat for', {255,0,255}, '$' .. 3500)
 		SetPedCoordsKeepVehicle(ped, x, y , z)
 		TriggerEvent('esx:spawnVehicle', "suntrap")
 	end
@@ -371,9 +384,33 @@ function OpenBoatsMenu(x, y , z)
 	if data.current.value == 'police' then
 		ESX.UI.Menu.CloseAll()
 
-		TriggerEvent("chatMessage", 'You took out a boat')
+		ESX.ShowNotification('You took out a boat')
 		SetPedCoordsKeepVehicle(ped, x, y , z)
 		TriggerEvent('esx:spawnVehicle', "predator")
+	end
+	
+	if data.current.value == 'police' then
+		ESX.UI.Menu.CloseAll()
+
+		ESX.ShowNotification('You took out a boat')
+		SetPedCoordsKeepVehicle(ped, x, y , z)
+		TriggerEvent('esx:spawnVehicle', "cgpredator")
+	end
+	
+	if data.current.value == 'police' then
+		ESX.UI.Menu.CloseAll()
+
+		ESX.ShowNotification('You took out a boat')
+		SetPedCoordsKeepVehicle(ped, x, y , z)
+		TriggerEvent('esx:spawnVehicle', "cgdinghy")
+	end
+	
+	if data.current.value == 'police' then
+		ESX.UI.Menu.CloseAll()
+
+		ESX.ShowNotification('You took out a boat')
+		SetPedCoordsKeepVehicle(ped, x, y , z)
+		TriggerEvent('esx:spawnVehicle', "cgexecutioner")
 	end
 	ESX.UI.Menu.CloseAll()
 	
