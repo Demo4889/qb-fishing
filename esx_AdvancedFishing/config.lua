@@ -9,17 +9,25 @@ Config = {}
 	--=====Prices of the items players can sell==========--
 	--------------------------------------------------------
 	--First amount minimum price second maximum amount (the amount player will get is random between those two numbers)
-	Config.FishPrice = {a = 2000, b = 3000} --Will get clean money THIS PRICE IS FOR EVERY 5 FISH ITEMS (5 kg)
-	Config.TurtlePrice = {a = 12000, b = 18000} --Will get dirty money
-	Config.SharkPrice = {a = 40000, b = 60000} --Will get dirty money
+	Config.FishPrice = {a = 300, b = 2000} --Will get clean money THIS PRICE IS FOR EVERY 5 FISH ITEMS (5 kg)
+	Config.TurtlePrice = {a = 4000, b = 13000} --Will get dirty money
+	Config.SharkPrice = {a = 15000, b = 20000} --Will get dirty money
 
 	--------------------------------------------------------
 	--=====Locations where players can sell stuff========--
 	--------------------------------------------------------
 
 	Config.SellFish = {x = -3251.2, y = 991.5, z = 11.49} --Place where players can sell their fish
-	Config.SellTurtle = {x = 3804.0, y = 4443.3, z = 3.0} --Place where players can sell their turtles 
-	Config.SellShark = {x = 2517.6 , y = 4218.0, z = 38.8} --Place where players can sell their sharks
+	Config.UseFishBlip = true --Whether or not to show the Fish Market Blip -- Default True
+	Config.FishBlip = {Coords = vector3(-3251.2, 991.5, 11.49)} -- Fish Blip Location
+
+	Config.SellTurtle = {x = 1338.58, y = 4359.75, z = 44.37} --Place where players can sell their turtles
+	Config.UseTurtleBlip = true --Whether or not to show the Turtle Dealer Blip -- Default False
+	Config.TurtleBlip = {Coords = vector3(1338.58, 4359.75, 44.37)} -- Fish Blip Location
+
+	Config.SellShark = {x = 470.76 , y = 3552.32, z = 32.3} --Place where players can sell their sharks
+	Config.UseSharkBlip = false --Whether or not to show the Shark Dealer Blip -- Default False
+	Config.SharkBlip = {Coords = vector3(470.76, 3552.32, 32.3)} -- Fish Blip Location
 
 	--------------------------------------------------------
 	--=====Locations where players can rent boats========--
