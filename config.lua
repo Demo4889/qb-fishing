@@ -28,6 +28,8 @@ Config = {
 		fishmarket = "Fish Market",
 		turtledealer = "Turtle Dealer",
 		sharkdealer = "Shark Dealer",
-
+		boatrental = "Boat Rental",
+		stopfishing = "Stopped Fishing",
+		tookbait = "The fish took the bait",
 	}
 }

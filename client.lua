@@ -35,16 +35,12 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
     PlayerJob = JobInfo
 end)
 
-RegisterNetEvent('fishing:message', function(message)
-	QBCore.Functions.Notify(message)
-end)
-
-RegisterNetEvent('fishing:break', function()
+RegisterNetEvent('qb-fishing:break', function()
 	fishing = false
 	ClearPedTasks(GetPlayerPed(-1))
 end)
 
-RegisterNetEvent('fishing:spawnPed', function()
+RegisterNetEvent('qb-fishing:spawnPed', function()
 	RequestModel( GetHashKey( "A_C_SharkTiger" ) )
 		while ( not HasModelLoaded( GetHashKey( "A_C_SharkTiger" ) ) ) do
 			Wait( 1 )
@@ -55,7 +51,7 @@ RegisterNetEvent('fishing:spawnPed', function()
 	SetEntityHealth(ped, 0)
 end)
 
-RegisterNetEvent('fishing:setbait', function(bool)
+RegisterNetEvent('qb-fishing:setbait', function(bool)
 	bait = bool
 	print(bait)
 end)
@@ -189,17 +185,17 @@ CreateThread(function()
 		end
 
 		if GetDistanceBetweenCoords(GetEntityCoords(GetPlayerPed(-1)), Config.SellFish.x, Config.SellFish.y, Config.SellFish.z, true) <= 3 then
-			TriggerServerEvent('fishing:startSelling', "fish")
+			TriggerServerEvent('qb-fishing:startSelling', "fish")
 			Wait(4000)
 		end
 
 		if GetDistanceBetweenCoords(GetEntityCoords(GetPlayerPed(-1)), Config.SellShark.x, Config.SellShark.y, Config.SellShark.z, true) <= 3 then
-			TriggerServerEvent('fishing:startSelling', "shark")
+			TriggerServerEvent('qb-fishing:startSelling', "shark")
 			Wait(4000)
 		end
 
 		if GetDistanceBetweenCoords(GetEntityCoords(GetPlayerPed(-1)), Config.SellTurtle.x, Config.SellTurtle.y, Config.SellTurtle.z, true) <= 3 then
-			TriggerServerEvent('fishing:startSelling', "turtle")
+			TriggerServerEvent('qb-fishing:startSelling', "turtle")
 			Wait(4000)
 		end
 	end
@@ -228,7 +224,7 @@ CreateThread(function()
 	end
 end)
 
-RegisterNetEvent('fishing:fishstart', function()
+RegisterNetEvent('qb-fishing:fishstart', function()
 	playerPed = GetPlayerPed(-1)
 	local pos = GetEntityCoords(GetPlayerPed(-1))
 	print('started fishing' .. pos)
