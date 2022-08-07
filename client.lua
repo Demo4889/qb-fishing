@@ -1,11 +1,10 @@
 QBCore = exports['qb-core']:GetCoreObject()
 PlayerJob = nil
 local fishing = false
-local lastInput = 0
 local pause = false
 local pausetimer = 0
 local correct = 0
-local bait = "none"
+local bait = nil
 
 local Keys = {
 	["ESC"] = 322, ["F1"] = 288, ["F2"] = 289, ["F3"] = 170, ["F5"] = 166, ["F6"] = 167, ["F7"] = 168, ["F8"] = 169, ["F9"] = 56, ["F10"] = 57,
@@ -54,6 +53,31 @@ end)
 RegisterNetEvent('qb-fishing:setbait', function(bool)
 	bait = bool
 	print(bait)
+end)
+
+RegisterNetEvent('qb-fishing:startFishing', function()
+	playerPed = GetPlayerPed(-1)
+	local pos = GetEntityCoords(GetPlayerPed(-1))
+	print('started fishing '..pos)
+	if IsPedInAnyVehicle(playerPed) then
+		QBCore.Functions.Notify("~y~You can not fish from a vehicle")
+	else
+		if (pos.y >= 7700 or pos.y <= -4000) or (pos.x <= -3700 or pos.x >= 4300) then
+			QBCore.Functions.Notify("~g~Fishing started")
+			TaskStartScenarioInPlace(GetPlayerPed(-1), "WORLD_HUMAN_STAND_FISHING", 0, true)
+			fishing = true
+		else
+			QBCore.Functions.Notify("~y~You need to go further away from the shore")
+		end
+	end
+	
+end, false)
+
+RegisterNetEvent("qb-fishing:getVehicle", function(vehicle)
+	local ped = PlayerPedId()
+	local coords = GetEntityCoords(ped)
+	local veh = vehicle
+
 end)
 
 -- Threads
@@ -177,7 +201,7 @@ CreateThread(function()
 			if pause and input ~= 0 then
 				pause = false
 				if input == correct then
-					TriggerServerEvent('fishing:catch', bait)
+					TriggerServerEvent('qb-fishing:catch', bait)
 				else
 					QBCore.Functions.Notify("~r~Fish got free")
 				end
@@ -224,107 +248,70 @@ CreateThread(function()
 	end
 end)
 
-RegisterNetEvent('qb-fishing:fishstart', function()
-	playerPed = GetPlayerPed(-1)
-	local pos = GetEntityCoords(GetPlayerPed(-1))
-	print('started fishing' .. pos)
-	if IsPedInAnyVehicle(playerPed) then
-		QBCore.Functions.Notify("~y~You can not fish from a vehicle")
-	else
-		if pos.y >= 7700 or pos.y <= -4000 or pos.x <= -3700 or pos.x >= 4300 then
-			QBCore.Functions.Notify("~g~Fishing started")
-			TaskStartScenarioInPlace(GetPlayerPed(-1), "WORLD_HUMAN_STAND_FISHING", 0, true)
-			fishing = true
-		else
-			QBCore.Functions.Notify("~y~You need to go further away from the shore")
-		end
-	end
-	
-end, false)
-
 CreateThread(function()
 	while true do
 		Wait(0)
-		for k in pairs(Config.MarkerZones) do
+		for k,v in pairs(Config.MarkerZones) do
 			local ped = PlayerPedId()
 			local pedcoords = GetEntityCoords(ped, false)
 			local distance = Vdist(pedcoords.x, pedcoords.y, pedcoords.z, Config.MarkerZones[k].x, Config.MarkerZones[k].y, Config.MarkerZones[k].z)
 			if distance <= 1.40 then
-					DisplayHelpText('Press E to rent a boat')
-					
-					if IsControlJustPressed(0, Keys['E']) and IsPedOnFoot(ped) then
-						OpenBoatsMenu(Config.MarkerZones[k].xs, Config.MarkerZones[k].ys, Config.MarkerZones[k].zs)
-					end
-			elseif distance < 1.45 then
-				ESX.UI.Menu.CloseAll()
-            end
-        end
-    end
+				if IsControlJustPressed(0, Keys['E']) and IsPedOnFoot(ped) then
+					OpenBoatsMenu()
+				end
+			end
+		end
+	end
 end)
 
-function OpenBoatsMenu(x, y , z)
-	local ped = PlayerPedId()
-	PlayerData = ESX.GetPlayerData()
-	local elements = {}
-		table.insert(elements, {label = '<span style="color:green;">Dinghy</span> <span style="color:red;">2500$</span>', value = 'boat'})
-		table.insert(elements, {label = '<span style="color:green;">Suntrap</span> <span style="color:red;">3500$</span>', value = 'boat6'})
-		table.insert(elements, {label = '<span style="color:green;">Jetmax</span> <span style="color:red;">4500$</span>', value = 'boat5'})
-		table.insert(elements, {label = '<span style="color:green;">Toro</span> <span style="color:red;">5500$</span>', value = 'boat2'})
-		table.insert(elements, {label = '<span style="color:green;">Marquis</span> <span style="color:red;">6000$</span>', value = 'boat3'})
-		
-	--If user has police job they will be able to get free Police Predator boat
-	if PlayerData.job.name == "police" then
-		table.insert(elements, {label = '<span style="color:green;">Police Predator</span>', value = 'police'})
-		table.insert(elements, {label = '<span style="color:green;">CG Predator</span>', value = 'police'})
-		table.insert(elements, {label = '<span style="color:green;">CG Dinghy</span>', value = 'police'})
-		table.insert(elements, {label = '<span style="color:green;">CG Executioner</span>', value = 'police'})
+function OpenBoatsMenu()
+	local boatMenu = {
+		{
+			header = Config.Language.menuheader,
+			isMenuHeader = true
+		}
+	}
+
+	local Vehicles = Config.RentalBoats.Citizen
+	local EmergencyVehicles = Config.RentalBoats.Emergency
+
+	for k,v in pairs(Config.EmergencyJobs) do
+		if PlayerJob ~= v then
+			for veh, label in pairs(Vehicles) do
+				vehicleMenu[#vehicleMenu+1] = {
+					header = label,
+					txt = "",
+					params = {
+						event = "qb-fishing:getVehicle",
+						args = {
+							vehicle = veh
+						}
+					}
+				}
+			end
+		else
+			for veh, label in pairs(EmergencyVehicles) do
+				vehicleMenu[#vehicleMenu+1] = {
+					header = label,
+					txt = "",
+					params = {
+						event = "qb-fishing:getVehicle",
+						args = {
+							vehicle = veh
+						}
+					}
+				}
+			end
+		end
 	end
 
-	ESX.UI.Menu.Open(
-    'default', GetCurrentResourceName(), 'client',
-    {
-		title    = 'Rent a boat',
-		align    = 'top-right',
-		elements = elements,
-    }, function(data, menu)
-		if data.current.value == 'boat' then
-			TriggerServerEvent("fishing:lowmoney", 2500)
-			QBCore.Functions.Notify('You rented a boat for', {255,0,255}, '$' .. 2500)
-			SetPedCoordsKeepVehicle(ped, x, y , z)
-			TriggerEvent('esx:spawnVehicle', "dinghy4")
-		elseif data.current.value == 'boat2' then
-			TriggerServerEvent("fishing:lowmoney", 5500)
-			QBCore.Functions.Notify('You rented a boat for', {255,0,255}, '$' .. 5500)
-			SetPedCoordsKeepVehicle(ped, x, y , z)
-			TriggerEvent('esx:spawnVehicle', "TORO")
-		elseif data.current.value == 'boat3' then
-			TriggerServerEvent("fishing:lowmoney", 6000)
-			QBCore.Functions.Notify('You rented a boat for', {255,0,255}, '$' .. 6000)
-			SetPedCoordsKeepVehicle(ped, x, y , z)
-			TriggerEvent('esx:spawnVehicle', "MARQUIS")
-		elseif data.current.value == 'boat4' then
-			TriggerServerEvent("fishing:lowmoney", 7500)
-			QBCore.Functions.Notify('You rented a boat for', {255,0,255}, '$' .. 7500)
-			SetPedCoordsKeepVehicle(ped, x, y , z)
-			TriggerEvent('esx:spawnVehicle', "tug")
-		elseif data.current.value == 'boat5' then
-			TriggerServerEvent("fishing:lowmoney", 4500)
-			QBCore.Functions.Notify('You rented a boat for', {255,0,255}, '$' .. 4500)
-			SetPedCoordsKeepVehicle(ped, x, y , z)
-			TriggerEvent('esx:spawnVehicle', "jetmax")
-		elseif data.current.value == 'boat6' then
-			TriggerServerEvent("fishing:lowmoney", 3500)
-			QBCore.Functions.Notify('You rented a boat for', {255,0,255}, '$' .. 3500)
-			SetPedCoordsKeepVehicle(ped, x, y , z)
-			TriggerEvent('esx:spawnVehicle', "suntrap")
-		elseif data.current.value == 'police' then
-			QBCore.Functions.Notify('You took out a boat')
-			SetPedCoordsKeepVehicle(ped, x, y , z)
-			TriggerEvent('esx:spawnVehicle', "predator")
-		end
-    end,
-	function(data, menu)
-		menu.close()
-		end
-	)
+	vehicleMenu[#vehicleMenu+1] = {
+        header = Config.Language.closemenu,
+        txt = "",
+        params = {
+            event = "qb-menu:client:closeMenu"
+        }
+
+    }
+    exports['qb-menu']:openMenu(vehicleMenu)
 end

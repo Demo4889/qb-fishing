@@ -29,10 +29,10 @@ QBCore.Functions.CreateUseableItem('fishbait', function(source)
 	
 end)
 
-QBCore.Functions.CreateUseableItem('turtle', function(source)
+QBCore.Functions.CreateUseableItem(Config.TurtleItem, function(source)
 	local _source = source
 	Player = QBCore.Functions.GetPlayer(_source)
-	if Player.getInventoryItem('fishingrod').count > 0 then
+	if Player.getInventoryItem(Config.FishingRod).count > 0 then
 		TriggerClientEvent('fishing:setbait', _source, "shark")
 		
 		Player.removeInventoryItem('turtle', 1)
@@ -43,9 +43,9 @@ QBCore.Functions.CreateUseableItem('turtle', function(source)
 	
 end)
 
-QBCore.Functions.CreateUseableItem('fishingrod', function(source)
+QBCore.Functions.CreateUseableItem(Config.FishingRod, function(source)
 	local _source = source
-	TriggerClientEvent('fishing:fishstart', _source)
+	TriggerClientEvent('qb-fishing:startFishing', _source)
 end)
 
 RegisterNetEvent('qb-fishing:catch', function(bait)
@@ -170,7 +170,7 @@ end)
 RegisterNetEvent('qb-fishing:startSelling', function(item)
 	local _source = source
 	local Player  = QBCore.Functions.GetPlayer(_source)
-	
+
 	if item == "fish" then
 		local fishCount = Player.getInventoryItem('fish').count
 

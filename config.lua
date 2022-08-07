@@ -1,4 +1,7 @@
 Config = {
+	FishingRod = "fishingrod",
+	TurtleItem = "turtle",
+	SharkItem = "shark",
 	FishTime = {a = 20000, b = 44000},
 	FishPrice = {a = 300, b = 2000},
 	TurtlePrice = {a = 4000, b = 13000},
@@ -24,6 +27,25 @@ Config = {
 		{ x = 1330.8  ,y = 4226.6 , z = 32.9, xs = 1334.2 , ys =  4192.4, zs = 30.0 },
 	},
 
+	EmergencyJobs = {"police", "ambulance", "mechanic"},
+
+	RentalBoats = {
+		Citizens = {
+			"dinghy",
+			"suntrap",
+			"jetmax",
+			"toro",
+			"marquis",
+			"tropic",
+			"speeder",
+			"squalo"
+		},
+		Emergency = {
+			"predator",
+			"seashark2"
+		}
+	},
+
 	Language = {
 		fishmarket = "Fish Market",
 		turtledealer = "Turtle Dealer",
@@ -31,5 +53,7 @@ Config = {
 		boatrental = "Boat Rental",
 		stopfishing = "Stopped Fishing",
 		tookbait = "The fish took the bait",
+		menuheader = "Rental Boats",
+		closemenu = "⬅ Close Menu"
 	}
 }
