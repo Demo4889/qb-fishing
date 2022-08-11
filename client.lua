@@ -4,7 +4,7 @@ local fishing = false
 local pause = false
 local pausetimer = 0
 local correct = 0
-local bait = nil
+local bait = "none"
 
 local Keys = {
 	["ESC"] = 322, ["F1"] = 288, ["F2"] = 289, ["F3"] = 170, ["F5"] = 166, ["F6"] = 167, ["F7"] = 168, ["F8"] = 169, ["F9"] = 56, ["F10"] = 57,
@@ -34,7 +34,7 @@ RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
     PlayerJob = JobInfo
 end)
 
-RegisterNetEvent('qb-fishing:break', function()
+RegisterNetEvent('qb-fishing:stopFishing', function()
 	fishing = false
 	ClearPedTasks(GetPlayerPed(-1))
 end)
@@ -50,8 +50,8 @@ RegisterNetEvent('qb-fishing:spawnPed', function()
 	SetEntityHealth(ped, 0)
 end)
 
-RegisterNetEvent('qb-fishing:setbait', function(bool)
-	bait = bool
+RegisterNetEvent('qb-fishing:setbait', function(bait)
+	bait = bait
 	print(bait)
 end)
 

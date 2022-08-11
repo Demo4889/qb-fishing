@@ -6,6 +6,8 @@ Config = {
 	FishPrice = {a = 300, b = 2000},
 	TurtlePrice = {a = 4000, b = 13000},
 	SharkPrice = {a = 15000, b = 20000},
+	TurtleChance = 75,
+	BreakChance = 94, -- If number is greater than this number, line will break
 
 	SellFish = { x = -3251.2, y = 991.5, z = 11.49},
 	UseFishBlip = true,
@@ -54,6 +56,9 @@ Config = {
 		stopfishing = "Stopped Fishing",
 		tookbait = "The fish took the bait",
 		menuheader = "Rental Boats",
-		closemenu = "⬅ Close Menu"
+		closemenu = "⬅ Close Menu",
+		brokeline = "The fish was too large and broke your line...",
+		canthold = "You can't hold anymore ",
+		caughtturtle = "You caught a turtle...",
 	}
 }
