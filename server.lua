@@ -70,7 +70,7 @@ RegisterNetEvent('qb-fishing:catch', function(bait)
 		else
 			if rnd >= 75 then
 				if Player.getInventoryItem('fish').count > 100 then
-					TriggerClientEvent('QBCore:Notify', _source, Config.Language.canthold..)
+					TriggerClientEvent('QBCore:Notify', _source, Config.Language.canthold)
 				else
 					TriggerClientEvent('QBCore:Notify', _source, "~g~You caught a fish")
 					Player.Functions.AddItem('fish', 1)
