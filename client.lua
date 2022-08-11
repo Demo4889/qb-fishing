@@ -5,6 +5,7 @@ local pause = false
 local pausetimer = 0
 local correct = 0
 local bait = "none"
+local blips = {}
 
 local Keys = {
 	["ESC"] = 322, ["F1"] = 288, ["F2"] = 289, ["F3"] = 170, ["F5"] = 166, ["F6"] = 167, ["F7"] = 168, ["F8"] = 169, ["F9"] = 56, ["F10"] = 57,
@@ -18,28 +19,22 @@ local Keys = {
 	["NENTER"] = 201, ["N4"] = 108, ["N5"] = 60, ["N6"] = 107, ["N+"] = 96, ["N-"] = 97, ["N7"] = 117, ["N8"] = 61, ["N9"] = 118
 }
 
--- Local Functions
-local function DisplayHelpText(str)
-	SetTextComponentFormat("STRING")
-	AddTextComponentString(str)
-	DisplayHelpTextFromStringLabel(0, 0, 1, -1)
-end
-
 -- Events
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
     PlayerJob = QBCore.Functions.GetPlayerData().job
+	placeBlips()
 end)
 
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
     PlayerJob = JobInfo
 end)
 
-RegisterNetEvent('qb-fishing:stopFishing', function()
+RegisterNetEvent('qb-fishing:client:stopFishing', function()
 	fishing = false
 	ClearPedTasks(GetPlayerPed(-1))
 end)
 
-RegisterNetEvent('qb-fishing:spawnPed', function()
+RegisterNetEvent('qb-fishing:client:spawnPed', function()
 	RequestModel( GetHashKey( "A_C_SharkTiger" ) )
 		while ( not HasModelLoaded( GetHashKey( "A_C_SharkTiger" ) ) ) do
 			Wait( 1 )
@@ -50,21 +45,21 @@ RegisterNetEvent('qb-fishing:spawnPed', function()
 	SetEntityHealth(ped, 0)
 end)
 
-RegisterNetEvent('qb-fishing:setbait', function(bait)
+RegisterNetEvent('qb-fishing:client:setBait', function(bait)
 	bait = bait
 	print(bait)
 end)
 
-RegisterNetEvent('qb-fishing:startFishing', function()
-	playerPed = GetPlayerPed(-1)
-	local pos = GetEntityCoords(GetPlayerPed(-1))
+RegisterNetEvent('qb-fishing:client:startFishing', function()
+	ped = GetPlayerPed(-1)
+	local pos = GetEntityCoords(ped)
 	print('started fishing '..pos)
 	if IsPedInAnyVehicle(playerPed) then
-		QBCore.Functions.Notify("~y~You can not fish from a vehicle")
+		QBCore.Functions.Notify(Config.Language.nofishveh)
 	else
 		if (pos.y >= 7700 or pos.y <= -4000) or (pos.x <= -3700 or pos.x >= 4300) then
 			QBCore.Functions.Notify("~g~Fishing started")
-			TaskStartScenarioInPlace(GetPlayerPed(-1), "WORLD_HUMAN_STAND_FISHING", 0, true)
+			TaskStartScenarioInPlace(ped, "WORLD_HUMAN_STAND_FISHING", 0, true)
 			fishing = true
 		else
 			QBCore.Functions.Notify("~y~You need to go further away from the shore")
@@ -73,7 +68,7 @@ RegisterNetEvent('qb-fishing:startFishing', function()
 	
 end, false)
 
-RegisterNetEvent("qb-fishing:getVehicle", function(vehicle)
+RegisterNetEvent("qb-fishing:client:getVehicle", function(vehicle)
 	local ped = PlayerPedId()
 	local coords = GetEntityCoords(ped)
 	local veh = vehicle
@@ -81,60 +76,6 @@ RegisterNetEvent("qb-fishing:getVehicle", function(vehicle)
 end)
 
 -- Threads
-CreateThread(function()
-	if Config.UseFishBlip then
-		local fishBlip = AddBlipForCoord(Config.FishBlip.coords)
-
-		SetBlipSprite (fishBlip, Config.FishBlip.sprite)
-		SetBlipDisplay(fishBlip, 4)
-		SetBlipScale(fishBlip, Config.FishBlip.scale)
-		SetBlipColour(fishBlip, Config.FishBlip.color)
-		SetBlipAsShortRange(fishBlip, true)
-		BeginTextCommandSetBlipName("STRING")
-		AddTextComponentString(Config.Language.fishmarket)
-		EndTextCommandSetBlipName(fishBlip)
-	end
-
-	if Config.UseTurtleBlip then
-		local turtleBlip = AddBlipForCoord(Config.TurtleBlip.coords)
-
-		SetBlipSprite (turtleBlip, Config.TurtleBlip.sprite)
-		SetBlipDisplay(turtleBlip, 4)
-		SetBlipScale(turtleBlip, Config.TurtleBlip.scale)
-		SetBlipColour(turtleBlip, Config.TurtleBlip.color)
-		SetBlipAsShortRange(turtleBlip, true)
-		BeginTextCommandSetBlipName("STRING")
-		AddTextComponentString(Config.Language.turtledealer)
-		EndTextCommandSetBlipName(turtleBlip)
-	end
-
-	if Config.UseSharkBlip then
-		local sharkBlip = AddBlipForCoord(Config.SharkBlip.coords)
-
-		SetBlipSprite (sharkBlip, Config.SharkBlip.sprite)
-		SetBlipDisplay(sharkBlip, 4)
-		SetBlipScale(sharkBlip, Config.SharkBlip.scale)
-		SetBlipColour(sharkBlip, Config.SharkBlip.color)
-		SetBlipAsShortRange(sharkBlip, true)
-		BeginTextCommandSetBlipName("STRING")
-		AddTextComponentString(Config.Language.sharkdealer)
-		EndTextCommandSetBlipName(sharkBlip)
-	end
-
-	for _, info in pairs(Config.MarkerZones) do
-		info.rentalBlip = AddBlipForCoord(info.x, info.y, info.z)
-
-		SetBlipSprite(info.rentalBlip, 455)
-		SetBlipDisplay(info.rentalBlip, 4)
-		SetBlipScale(info.rentalBlip, 1.0)
-		SetBlipColour(info.rentalBlip, 20)
-		SetBlipAsShortRange(info.rentalBlip, true)
-		BeginTextCommandSetBlipName("STRING")
-		AddTextComponentString(Config.Language.boatrental)
-		EndTextCommandSetBlipName(info.rentalBlip)
-	end
-end)
-
 CreateThread(function()
     while true do
         Wait(0)
@@ -181,15 +122,15 @@ CreateThread(function()
 			end
 
 			if fishing then
-				playerPed = GetPlayerPed(-1)
-				local pos = GetEntityCoords(GetPlayerPed(-1))
+				ped = GetPlayerPed(-1)
+				local pos = GetEntityCoords(ped)
 				if pos.y >= 7700 or pos.y <= -4000 or pos.x <= -3700 or pos.x >= 4300 or IsPedInAnyVehicle(GetPlayerPed(-1)) then
 					
 				else
 					fishing = false
 					QBCore.Functions.Notify(Config.Language.stopfishing)
 				end
-				if IsEntityDead(playerPed) or IsEntityInWater(playerPed) then
+				if IsEntityDead(ped) or IsEntityInWater(ped) then
 					QBCore.Functions.Notify(Config.Language.stopfishing)
 				end
 			end
@@ -201,7 +142,7 @@ CreateThread(function()
 			if pause and input ~= 0 then
 				pause = false
 				if input == correct then
-					TriggerServerEvent('qb-fishing:catch', bait)
+					TriggerServerEvent('qb-fishing:server:catchFish', bait)
 				else
 					QBCore.Functions.Notify("~r~Fish got free")
 				end
@@ -209,17 +150,17 @@ CreateThread(function()
 		end
 
 		if GetDistanceBetweenCoords(GetEntityCoords(GetPlayerPed(-1)), Config.SellFish.x, Config.SellFish.y, Config.SellFish.z, true) <= 3 then
-			TriggerServerEvent('qb-fishing:startSelling', "fish")
+			TriggerServerEvent('qb-fishing:server:startSelling', "fish")
 			Wait(4000)
 		end
 
 		if GetDistanceBetweenCoords(GetEntityCoords(GetPlayerPed(-1)), Config.SellShark.x, Config.SellShark.y, Config.SellShark.z, true) <= 3 then
-			TriggerServerEvent('qb-fishing:startSelling', "shark")
+			TriggerServerEvent('qb-fishing:server:startSelling', "shark")
 			Wait(4000)
 		end
 
 		if GetDistanceBetweenCoords(GetEntityCoords(GetPlayerPed(-1)), Config.SellTurtle.x, Config.SellTurtle.y, Config.SellTurtle.z, true) <= 3 then
-			TriggerServerEvent('qb-fishing:startSelling', "turtle")
+			TriggerServerEvent('qb-fishing:server:startSelling', "turtle")
 			Wait(4000)
 		end
 	end
@@ -236,12 +177,11 @@ end)
 
 CreateThread(function()
 	while true do
-		local wait = math.random(Config.FishTime.a, Config.FishTime.b)
-		Wait(wait)
+		local FishTime = math.random(Config.TimeToFish.min, Config.TimeToFish.max)
+		Wait(FishTime)
 		if fishing then
 			pause = true
 			correct = math.random(1,8)
-			QBCore.Functions.Notify("~g~Fish is taking the bait \n ~h~Press " .. correct .. " to catch it")
 			input = 0
 			pausetimer = 0
 		end
@@ -272,8 +212,8 @@ function OpenBoatsMenu()
 		}
 	}
 
-	local Vehicles = Config.RentalBoats.Citizen
-	local EmergencyVehicles = Config.RentalBoats.Emergency
+	local Vehicles = Config.RentalBoats.citizens
+	local EmergencyVehicles = Config.RentalBoats.emergency
 
 	for k,v in pairs(Config.EmergencyJobs) do
 		if PlayerJob ~= v then
@@ -315,3 +255,28 @@ function OpenBoatsMenu()
     }
     exports['qb-menu']:openMenu(vehicleMenu)
 end
+
+function placeBlips()
+	for k,v in pairs(Config.SalesLocations) do
+		if v.blip then
+			local blips[k] = AddBlipForCoord(v.coords)
+
+			SetBlipSprite(blips[k], v.sprite)
+			SetBlipDisplay(blips[k], 4)
+			SetBlipScale(blips[k], v.scale)
+			SetBlipColour(blips[k], v.color)
+			SetBlipAsShortRange(blips[k], true)
+			BeginTextCommandSetBlipName("STRING")
+			AddTextComponentString(v.name)
+			EndTextCommandSetBlipName(blips[k])
+		end
+	end
+end
+
+AddEventHandler('onResourceStart', function(resource)
+	if resource == GetCurrentResourceName() then
+		Wait(100)
+		print("blips", blips[k])
+		RemoveBlip(blips[k])
+	end
+end)

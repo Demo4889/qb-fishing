@@ -1,86 +1,66 @@
 QBCore = exports['qb-core']:GetCoreObject()
 
-QBCore.Functions.CreateUseableItem('turtlebait', function(source)
-	local _source = source
-	Player = QBCore.Functions.GetPlayer(_source)
-	if Player.getInventoryItem('fishingrod').count > 0 then
-		TriggerClientEvent('fishing:setbait', _source, "turtle")
-		
-		Player.removeInventoryItem('turtlebait', 1)
-		TriggerClientEvent('QBCore:Notify', _source, "~g~You attach the turtle bait onto your fishing rod")
+QBCore.Functions.CreateUseableItem(Config.FishBait, function(source)
+	local Player = QBCore.Functions.GetPlayer(source)
+	local rod = Player.Functions.GetItemByName(Config.FishingRod)
+	if rod.count >= 1 then
+		TriggerClientEvent('fishing:client:setBait', source, Config.FishBait)
+		Player.Functions.RemoveItem(Config.FishBait, 1)
+		TriggerClientEvent('QBCore:Notify', source, Config.Language.baitattached)
 	else
-		TriggerClientEvent('QBCore:Notify', _source, "~r~You dont have a fishing rod")
+		TriggerClientEvent('QBCore:Notify', source, Config.Language.norod)
 	end
-	
-end)
-
-QBCore.Functions.CreateUseableItem('fishbait', function(source)
-	local _source = source
-	Player = QBCore.Functions.GetPlayer(_source)
-	if Player.getInventoryItem('fishingrod').count > 0 then
-		TriggerClientEvent('fishing:setbait', _source, "fish")
-		
-		Player.removeInventoryItem('fishbait', 1)
-		TriggerClientEvent('QBCore:Notify', _source, "~g~You attach the fish bait onto your fishing rod")
-		
-	else
-		TriggerClientEvent('QBCore:Notify', _source, "~r~You dont have a fishing rod")
-	end
-	
 end)
 
 QBCore.Functions.CreateUseableItem(Config.TurtleItem, function(source)
-	local _source = source
-	Player = QBCore.Functions.GetPlayer(_source)
-	if QBCore.Functions.HasItem(Config.FishingRod) then
-		TriggerClientEvent('fishing:setbait', _source, Config.TurtleItem)
-		
-		Player.removeInventoryItem('turtle', 1)
-		TriggerClientEvent('QBCore:Notify', _source, "~g~You attach the turtle meat onto the fishing rod")
+	local Player = QBCore.Functions.GetPlayer(source)
+	local rodAmount = Player.Functions.GetItemByName(Config.FishingRod).amount
+	if rodAmount >= 1 then
+		TriggerClientEvent('fishing:client:setBait', source, Config.TurtleItem)
+		Player.Functions.RemoveItem(Config.TurtleItem, 1)
+		TriggerClientEvent('QBCore:Notify', source, Config.Language.baitattached)
 	else
-		TriggerClientEvent('QBCore:Notify', _source, "~r~You dont have a fishing rod")
+		TriggerClientEvent('QBCore:Notify', source, Config.Language.norod)
 	end
 end)
 
 QBCore.Functions.CreateUseableItem(Config.FishingRod, function(source)
-	local _source = source
-	TriggerClientEvent('qb-fishing:startFishing', _source)
+	TriggerClientEvent('qb-fishing:client:startFishing', source)
 end)
 
-RegisterNetEvent('qb-fishing:catch', function(bait)
-	_source = source
+RegisterNetEvent('qb-fishing:server:catchFish', function(bait)
 	local rnd = math.random(1,100)
-	Player = QBCore.Functions.GetPlayer(_source)
+	local Player = QBCore.Functions.GetPlayer(source)
 	if bait == "turtle" then
 		if rnd >= Config.TurtleChance then
 			if rnd >= Config.BreakChance then
-				TriggerClientEvent('qb-fishing:setbait', _source, "none")
-				TriggerClientEvent('QBCore:Notify', _source, Config.Language.brokeline)
-				TriggerClientEvent('qb-fishing:stopFishing', _source)
+				TriggerClientEvent('qb-fishing:client:setbait', source, "none")
+				TriggerClientEvent('QBCore:Notify', source, Config.Language.brokeline)
+				TriggerClientEvent('qb-fishing:client:stopFishing', source)
 				Player.removeInventoryItem('fishingrod', 1)
 			else
-				TriggerClientEvent('qb-fishing:setbait', _source, "none")
+				TriggerClientEvent('qb-fishing:client:setbait', source, "none")
 				if Player.getInventoryItem('shark').count > 4 then
-					TriggerClientEvent('QBCore:Notify', _source, Config.Language.canthold)
+					TriggerClientEvent('QBCore:Notify', source, Config.Language.canthold)
 				else
-					TriggerClientEvent('QBCore:Notify', _source, Config.Language.caughtturtle)
+					TriggerClientEvent('QBCore:Notify', source, Config.Language.caughtturtle)
 					Player.Functions.AddItem('shark', 1)
 				end
 			end
 		else
 			if rnd >= 75 then
 				if Player.getInventoryItem('fish').count > 100 then
-					TriggerClientEvent('QBCore:Notify', _source, Config.Language.canthold)
+					TriggerClientEvent('QBCore:Notify', source, Config.Language.canthold)
 				else
-					TriggerClientEvent('QBCore:Notify', _source, "~g~You caught a fish")
+					TriggerClientEvent('QBCore:Notify', source, "~g~You caught a fish")
 					Player.Functions.AddItem('fish', 1)
 				end
 				
 			else
 				if Player.getInventoryItem('fish').count > 100 then
-					TriggerClientEvent('QBCore:Notify', _source, "~r~You cant hold more fish")
+					TriggerClientEvent('QBCore:Notify', source, "~r~You cant hold more fish")
 				else
-					TriggerClientEvent('QBCore:Notify', _source, "~g~You caught a fish")
+					TriggerClientEvent('QBCore:Notify', source, "~g~You caught a fish")
 					Player.Functions.AddItem('fish', 1)
 				end
 			end
@@ -88,37 +68,37 @@ RegisterNetEvent('qb-fishing:catch', function(bait)
 	else
 		if bait == "fish" then
 			if rnd >= 75 then
-				TriggerClientEvent('qb-fishing:setbait', _source, "none")
+				TriggerClientEvent('qb-fishing:client:setbait', source, "none")
 				if Player.getInventoryItem('fish').count > 100 then
-					TriggerClientEvent('QBCore:Notify', _source, "~r~You cant hold more fish")
+					TriggerClientEvent('QBCore:Notify', source, "~r~You cant hold more fish")
 				else
-					TriggerClientEvent('QBCore:Notify', _source, "~g~You caught a fish")
+					TriggerClientEvent('QBCore:Notify', source, "~g~You caught a fish")
 					Player.Functions.AddItem('fish', 1)
 				end
 			else
 				if Player.getInventoryItem('fish').count > 100 then
-					TriggerClientEvent('QBCore:Notify', _source, "~r~You cant hold more fish")
+					TriggerClientEvent('QBCore:Notify', source, "~r~You cant hold more fish")
 				else
-					TriggerClientEvent('QBCore:Notify', _source, "~g~You caught a fish")
+					TriggerClientEvent('QBCore:Notify', source, "~g~You caught a fish")
 					Player.Functions.AddItem('fish', 1)
 				end
 			end
 		end
 		if bait == "none" then
 			if rnd >= 70 then
-				TriggerClientEvent('QBCore:Notify', _source, "~y~You are currently fishing without any equipped bait")
+				TriggerClientEvent('QBCore:Notify', source, "~y~You are currently fishing without any equipped bait")
 				if Player.getInventoryItem('fish').count > 100 then
-					TriggerClientEvent('QBCore:Notify', _source, "~r~You cant hold more fish")
+					TriggerClientEvent('QBCore:Notify', source, "~r~You cant hold more fish")
 				else
-					TriggerClientEvent('QBCore:Notify', _source, "~g~You caught a fish")
+					TriggerClientEvent('QBCore:Notify', source, "~g~You caught a fish")
 					Player.Functions.AddItem('fish', 1)
 				end
 			else
-				TriggerClientEvent('QBCore:Notify', _source, "~y~You are currently fishing without any equipped bait")
+				TriggerClientEvent('QBCore:Notify', source, "~y~You are currently fishing without any equipped bait")
 				if Player.getInventoryItem('fish').count > 100 then
-					TriggerClientEvent('QBCore:Notify', _source, "~r~You cant hold more fish")
+					TriggerClientEvent('QBCore:Notify', source, "~r~You cant hold more fish")
 				else
-					TriggerClientEvent('QBCore:Notify', _source, "~g~You caught a fish")
+					TriggerClientEvent('QBCore:Notify', source, "~g~You caught a fish")
 					Player.Functions.AddItem('fish', 1)
 				end
 			end
@@ -126,47 +106,37 @@ RegisterNetEvent('qb-fishing:catch', function(bait)
 	end
 end)
 
-RegisterNetEvent("qb-fishing:lowmoney", function(money)
-    local _source = source	
-	local Player = QBCore.Functions.GetPlayer(_source)
-	Player.removeMoney(money)
-end)
-
-RegisterNetEvent('qb-fishing:startSelling', function(item)
-	local _source = source
-	local Player  = QBCore.Functions.GetPlayer(_source)
+RegisterNetEvent('qb-fishing:server:startSelling', function(item)
+	local Player  = QBCore.Functions.GetPlayer(source)
 
 	if item == "fish" then
-		local fishCount = Player.getInventoryItem('fish').count
+		local fishCount = Player.Functions.GetItemByName(Config.FishItem).amount
 
 		if fishCount <= 4 then
-			TriggerClientEvent('esx:showNotification', source, '~r~You dont have enough~s~ fish')			
+			TriggerClientEvent('QBCore:Notify', source, '~r~You dont have enough~s~ fish')
 		else
-			Player.removeInventoryItem('fish', 5)
-			local payment = Config.FishPrice.a
-			payment = math.random(Config.FishPrice.a, Config.FishPrice.b) 
+			Player.Functions.RemoveItem('fish', 5)
+			local payment = math.random(Config.FishPrice.min, Config.FishPrice.max)
 			Player.addMoney(payment)
 		end
 	elseif item == "turtle" then
-		local turtleCount = Player.getInventoryItem('turtle').count
+		local turtleCount = Player.Functions.GetItemByName('turtle').amount
 
 		if turtleCount <= 0 then
-			TriggerClientEvent('esx:showNotification', source, '~r~You dont have enough~s~ turtles')			
+			TriggerClientEvent('QBCore:Notify', source, '~r~You dont have enough~s~ turtles')
 		else
-			Player.removeInventoryItem('turtle', 1)
-			local payment = Config.TurtlePrice.a
-			payment = math.random(Config.TurtlePrice.a, Config.TurtlePrice.b) 
+			Player.Functions.RemoveItem('turtle', 1)
+			local payment = math.random(Config.TurtlePrice.min, Config.TurtlePrice.max)
 			Player.addAccountMoney('black_money', payment)
 		end
 	elseif item == "shark" then
-		local sharkCount = Player.getInventoryItem('shark').count
+		local sharkCount = Player.Functions.GetItemByName('shark').amount
 
 		if sharkCount <= 0 then
-			TriggerClientEvent('esx:showNotification', source, '~r~You dont have enough~s~ sharks')			
+			TriggerClientEvent('QBCore:Notify', source, '~r~You dont have enough~s~ sharks')
 		else
-			Player.removeInventoryItem('shark', 1)
-			local payment = Config.SharkPrice.a
-			payment = math.random(Config.SharkPrice.a, Config.SharkPrice.b)
+			Player.Functions.RemoveItem('shark', 1)
+			payment = math.random(Config.SharkPrice.min, Config.SharkPrice.max)
 			Player.addAccountMoney('black_money', payment)
 		end
 	end

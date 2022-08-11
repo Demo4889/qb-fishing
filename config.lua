@@ -1,38 +1,48 @@
 Config = {
-	FishingRod = "fishingrod",
-	TurtleItem = "turtle",
-	SharkItem = "shark",
-	FishTime = {a = 20000, b = 44000},
-	FishPrice = {a = 300, b = 2000},
-	TurtlePrice = {a = 4000, b = 13000},
-	SharkPrice = {a = 15000, b = 20000},
-	TurtleChance = 75,
+	FishingRod = "fishingrod", -- Fishing Rod item
+	TurtleItem = "turtle", -- Turtle Item
+	SharkItem = "shark", -- Shark Item
+	FishBait = "fishbait", -- Fishing Bait Item
+	FishItem = "fish", -- Fish Item
+
+	TimeToFish = {min = 20000, max = 44000}, --Time in ms (1000 ms = 1 sec)
+	FishPrice = {min = 300, max = 2000}, -- Min and Max price for fish. Fish sell at a random price each time
+	TurtlePrice = {min = 4000, max = 13000}, -- Min and Max price for turtles. Turtles sell at a random price each time
+	SharkPrice = {min = 15000, max = 20000}, -- Min and Max price for sharks. Sharks sell at a random price each time
+	TurtleChance = 75, -- Chance to catch a turtle if using the correct bait
 	BreakChance = 94, -- If number is greater than this number, line will break
 
-	SellFish = { x = -3251.2, y = 991.5, z = 11.49},
-	UseFishBlip = true,
-	FishBlip = { coords = vector3(-3251.2, 991.5, 11.49), sprite = 356, scale = 1.0, color = 17},
-
-	SellTurtle = { x = 1338.58, y = 4359.75, z = 44.37},
-	UseTurtleBlip = true,
-	TurtleBlip = { coords = vector3(1338.58, 4359.75, 44.37), sprite = 68, scale = 1.0, color = 49},
-
-	SellShark = { x = 470.76 , y = 3552.32, z = 32.3},
-	UseSharkBlip = false,
-	SharkBlip = { coords = vector3(470.76, 3552.32, 32.3), sprite = 68, scale = 1.0, color = 49},
-
-	MarkerZones = {
-		{ x = -3426.7 ,y = 955.66 , z = 7.35, xs = -3426.2, ys = 942.4, zs = 1.1 },
-		{ x = -732.9 ,y = -1309.7 , z = 4.0, xs = -725.7 , ys = -1351.5, zs = 0.5 },
-		{ x = -1607.6 ,y = 5252.8 , z = 3.0, xs = -1590.2 , ys = 5278.8, zs = 1.0 },
-		{ x = 3855.0 ,y = 4463.7 , z = 1.6, xs = 3885.2 , ys =  4507.2, zs = 1.0 },
-		{ x = 1330.8  ,y = 4226.6 , z = 32.9, xs = 1334.2 , ys =  4192.4, zs = 30.0 },
+	SalesLocations = {
+		Fish = {
+			blip = true,
+			coords = vector3(-3251.2, 991.5, 11.49),
+			sprite = 356,
+			color = 17,
+			scale = 1.0,
+			name = "Fish Market"
+		},
+		Turtle = {
+			blip = false,
+			coords = vector3(1338.58, 4359.75, 44.37),
+			sprite = 68,
+			color = 49,
+			scale = 1.0,
+			name = "Turtle Dealer"
+		},
+		Shark = {
+			blip = false,
+			coords = vector3(470.76, 3552.32, 32.3),
+			sprite = 68,
+			color = 49,
+			scale = 1.0,
+			name = "Shark Dealer"
+		}
 	},
 
-	EmergencyJobs = {"police", "ambulance", "mechanic"},
+	EmergencyJobs = {"police", "ambulance"}, -- Add Jobs here that will get a free boat
 
 	RentalBoats = {
-		Citizens = {
+		citizens = {
 			"dinghy",
 			"suntrap",
 			"jetmax",
@@ -42,16 +52,13 @@ Config = {
 			"speeder",
 			"squalo"
 		},
-		Emergency = {
+		emergency = {
 			"predator",
 			"seashark2"
 		}
 	},
 
 	Language = {
-		fishmarket = "Fish Market",
-		turtledealer = "Turtle Dealer",
-		sharkdealer = "Shark Dealer",
 		boatrental = "Boat Rental",
 		stopfishing = "Stopped Fishing",
 		tookbait = "The fish took the bait",
@@ -60,5 +67,8 @@ Config = {
 		brokeline = "The fish was too large and broke your line...",
 		canthold = "You can't hold anymore ",
 		caughtturtle = "You caught a turtle...",
+		baitattached = "You attached the bait to your pole...",
+		norod = "You don't have a fishing rod...",
+		nofishveh = "You cannot fish while in a vehicle",
 	}
 }
