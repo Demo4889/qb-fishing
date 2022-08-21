@@ -1,28 +1,19 @@
 QBCore = exports['qb-core']:GetCoreObject()
-PlayerJob = nil
+
+local config = Config
+local PlayerJob = nil
 local fishing = false
 local pause = false
 local pausetimer = 0
 local correct = 0
 local bait = "none"
 local blips = {}
-
-local Keys = {
-	["ESC"] = 322, ["F1"] = 288, ["F2"] = 289, ["F3"] = 170, ["F5"] = 166, ["F6"] = 167, ["F7"] = 168, ["F8"] = 169, ["F9"] = 56, ["F10"] = 57,
-	["~"] = 243, ["1"] = 157, ["2"] = 158, ["3"] = 160, ["4"] = 164, ["5"] = 165, ["6"] = 159, ["7"] = 161, ["8"] = 162, ["9"] = 163, ["-"] = 84, ["="] = 83, ["BACKSPACE"] = 177,
-	["TAB"] = 37, ["Q"] = 44, ["W"] = 32, ["E"] = 38, ["R"] = 45, ["T"] = 245, ["Y"] = 246, ["U"] = 303, ["P"] = 199, ["["] = 39, ["]"] = 40, ["ENTER"] = 18,
-	["CAPS"] = 137, ["A"] = 34, ["S"] = 8, ["D"] = 9, ["F"] = 23, ["G"] = 47, ["H"] = 74, ["K"] = 311, ["L"] = 182,
-	["LEFTSHIFT"] = 21, ["Z"] = 20, ["X"] = 73, ["C"] = 26, ["V"] = 0, ["B"] = 29, ["N"] = 249, ["M"] = 244, [","] = 82, ["."] = 81,
-	["LEFTCTRL"] = 36, ["LEFTALT"] = 19, ["SPACE"] = 22, ["RIGHTCTRL"] = 70,
-	["HOME"] = 213, ["PAGEUP"] = 10, ["PAGEDOWN"] = 11, ["DELETE"] = 178,
-	["LEFT"] = 174, ["RIGHT"] = 175, ["TOP"] = 27, ["DOWN"] = 173,
-	["NENTER"] = 201, ["N4"] = 108, ["N5"] = 60, ["N6"] = 107, ["N+"] = 96, ["N-"] = 97, ["N7"] = 117, ["N8"] = 61, ["N9"] = 118
-}
+local models = {}
 
 -- Events
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
     PlayerJob = QBCore.Functions.GetPlayerData().job
-	placeBlips()
+	placePoints()
 end)
 
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
@@ -55,14 +46,14 @@ RegisterNetEvent('qb-fishing:client:startFishing', function()
 	local pos = GetEntityCoords(ped)
 	print('started fishing '..pos)
 	if IsPedInAnyVehicle(playerPed) then
-		QBCore.Functions.Notify(Config.Language.nofishveh)
+		QBCore.Functions.Notify(config.Language.nofishveh, "error", 3000)
 	else
 		if (pos.y >= 7700 or pos.y <= -4000) or (pos.x <= -3700 or pos.x >= 4300) then
-			QBCore.Functions.Notify("~g~Fishing started")
+			QBCore.Functions.Notify(config.Language.startedfishing, "success", 3000)
 			TaskStartScenarioInPlace(ped, "WORLD_HUMAN_STAND_FISHING", 0, true)
 			fishing = true
 		else
-			QBCore.Functions.Notify("~y~You need to go further away from the shore")
+			QBCore.Functions.Notify(config.Language.furthershore, "error", 3000)
 		end
 	end
 	
@@ -77,12 +68,9 @@ end)
 
 -- Threads
 CreateThread(function()
-    while true do
-        Wait(0)
-        for k in pairs(Config.MarkerZones) do
-            DrawMarker(1, Config.MarkerZones[k].x, Config.MarkerZones[k].y, Config.MarkerZones[k].z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.0, 3.0, 1.0, 0, 150, 150, 100, 0, 0, 0, 0)
-		end
-    end
+	if config.UseTarget then
+		
+	end
 end)
 
 CreateThread(function()
@@ -96,110 +84,12 @@ end)
 
 CreateThread(function()
 	while true do
-		Wait(5)
-		if fishing then
-			if IsControlJustReleased(0, Keys['1']) then
-				input = 1
-			elseif IsControlJustReleased(0, Keys['2']) then
-				input = 2
-			elseif IsControlJustReleased(0, Keys['3']) then
-				input = 3
-			elseif IsControlJustReleased(0, Keys['4']) then
-				input = 4
-			elseif IsControlJustReleased(0, Keys['5']) then
-				input = 5
-			elseif IsControlJustReleased(0, Keys['6']) then
-				input = 6
-			elseif IsControlJustReleased(0, Keys['7']) then
-				input = 7
-			elseif IsControlJustReleased(0, Keys['8']) then
-				input = 8
-			end
-
-			if IsControlJustReleased(0, Keys['X']) then
-				fishing = false
-				QBCore.Functions.Notify(Config.Language.stopfishing)
-			end
-
-			if fishing then
-				ped = GetPlayerPed(-1)
-				local pos = GetEntityCoords(ped)
-				if pos.y >= 7700 or pos.y <= -4000 or pos.x <= -3700 or pos.x >= 4300 or IsPedInAnyVehicle(GetPlayerPed(-1)) then
-					
-				else
-					fishing = false
-					QBCore.Functions.Notify(Config.Language.stopfishing)
-				end
-				if IsEntityDead(ped) or IsEntityInWater(ped) then
-					QBCore.Functions.Notify(Config.Language.stopfishing)
-				end
-			end
-
-			if pausetimer > 3 then
-				input = 99
-			end
-
-			if pause and input ~= 0 then
-				pause = false
-				if input == correct then
-					TriggerServerEvent('qb-fishing:server:catchFish', bait)
-				else
-					QBCore.Functions.Notify("~r~Fish got free")
-				end
-			end
-		end
-
-		if GetDistanceBetweenCoords(GetEntityCoords(GetPlayerPed(-1)), Config.SellFish.x, Config.SellFish.y, Config.SellFish.z, true) <= 3 then
-			TriggerServerEvent('qb-fishing:server:startSelling', "fish")
-			Wait(4000)
-		end
-
-		if GetDistanceBetweenCoords(GetEntityCoords(GetPlayerPed(-1)), Config.SellShark.x, Config.SellShark.y, Config.SellShark.z, true) <= 3 then
-			TriggerServerEvent('qb-fishing:server:startSelling', "shark")
-			Wait(4000)
-		end
-
-		if GetDistanceBetweenCoords(GetEntityCoords(GetPlayerPed(-1)), Config.SellTurtle.x, Config.SellTurtle.y, Config.SellTurtle.z, true) <= 3 then
-			TriggerServerEvent('qb-fishing:server:startSelling', "turtle")
-			Wait(4000)
-		end
-	end
-end)
-
-CreateThread(function()
-	while true do
-		Wait(1)
-		DrawMarker(1, Config.SellFish.x, Config.SellFish.y, Config.SellFish.z , 0.0, 0.0, 0.0, 0, 0.0, 0.0, 3.0, 3.0, 2.0, 0, 70, 250, 100, false, true, 2, false, false, false, false)
-		DrawMarker(1, Config.SellTurtle.x, Config.SellTurtle.y, Config.SellTurtle.z , 0.0, 0.0, 0.0, 0, 0.0, 0.0, 2.0, 2.0, 0, 1.0, 70, 250, 100, false, true, 2, false, false, false, false)
-		DrawMarker(27, Config.SellShark.x, Config.SellShark.y, Config.SellShark.z, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 2.0, 2.0, 2.0, 0, 70, 250, 100, false, true, 2, false, false, false, false)
-	end
-end)
-
-CreateThread(function()
-	while true do
-		local FishTime = math.random(Config.TimeToFish.min, Config.TimeToFish.max)
+		local FishTime = math.random(config.TimeToFish.min, config.TimeToFish.max)
 		Wait(FishTime)
 		if fishing then
 			pause = true
 			correct = math.random(1,8)
-			input = 0
 			pausetimer = 0
-		end
-	end
-end)
-
-CreateThread(function()
-	while true do
-		Wait(0)
-		for k,v in pairs(Config.MarkerZones) do
-			local ped = PlayerPedId()
-			local pedcoords = GetEntityCoords(ped, false)
-			local distance = Vdist(pedcoords.x, pedcoords.y, pedcoords.z, Config.MarkerZones[k].x, Config.MarkerZones[k].y, Config.MarkerZones[k].z)
-			if distance <= 1.40 then
-				if IsControlJustPressed(0, Keys['E']) and IsPedOnFoot(ped) then
-					OpenBoatsMenu()
-				end
-			end
 		end
 	end
 end)
@@ -207,22 +97,22 @@ end)
 function OpenBoatsMenu()
 	local boatMenu = {
 		{
-			header = Config.Language.menuheader,
+			header = config.Language.menuheader,
 			isMenuHeader = true
 		}
 	}
 
-	local Vehicles = Config.RentalBoats.citizens
-	local EmergencyVehicles = Config.RentalBoats.emergency
+	local Vehicles = config.RentalBoats.citizens
+	local EmergencyVehicles = config.RentalBoats.emergency
 
-	for k,v in pairs(Config.EmergencyJobs) do
+	for k,v in pairs(config.EmergencyJobs) do
 		if PlayerJob ~= v then
 			for veh, label in pairs(Vehicles) do
 				vehicleMenu[#vehicleMenu+1] = {
 					header = label,
 					txt = "",
 					params = {
-						event = "qb-fishing:getVehicle",
+						event = "qb-fishing:client:getVehicle",
 						args = {
 							vehicle = veh
 						}
@@ -235,7 +125,7 @@ function OpenBoatsMenu()
 					header = label,
 					txt = "",
 					params = {
-						event = "qb-fishing:getVehicle",
+						event = "qb-fishing:client:getVehicle",
 						args = {
 							vehicle = veh
 						}
@@ -246,7 +136,7 @@ function OpenBoatsMenu()
 	end
 
 	vehicleMenu[#vehicleMenu+1] = {
-        header = Config.Language.closemenu,
+        header = config.Language.closemenu,
         txt = "",
         params = {
             event = "qb-menu:client:closeMenu"
@@ -256,19 +146,72 @@ function OpenBoatsMenu()
     exports['qb-menu']:openMenu(vehicleMenu)
 end
 
-function placeBlips()
-	for k,v in pairs(Config.SalesLocations) do
-		if v.blip then
-			local blips[k] = AddBlipForCoord(v.coords)
+function placePoints()
+	for _,sales in pairs(config.SalesLocations) do
+		if sales.blip then
+			for _,marker in pairs(sales.coords) do
+				local blip = AddBlipForCoord(marker.x, marker.y, marker.z)
 
-			SetBlipSprite(blips[k], v.sprite)
-			SetBlipDisplay(blips[k], 4)
-			SetBlipScale(blips[k], v.scale)
-			SetBlipColour(blips[k], v.color)
-			SetBlipAsShortRange(blips[k], true)
+				SetBlipSprite(blip, sales.sprite)
+				SetBlipDisplay(blip, 4)
+				SetBlipScale(blip, sales.scale)
+				SetBlipColour(blip, sales.color)
+				SetBlipAsShortRange(blip, true)
+				BeginTextCommandSetBlipName("STRING")
+				AddTextComponentString(sales.name)
+				EndTextCommandSetBlipName(blip)
+				blips[#blips+1] = blip
+			end
+		end
+
+		if sales.npcs then
+			for _,ped in pairs(sales.peds) do
+				RequestModel(GetHashKey(ped.model))
+
+				while not HasModelLoaded(GetHashKey(ped.model)) do
+					Wait(1)
+				end
+
+				local model = CreatePed(2, GetHashKey(ped.model), ped.coords.x, ped.coords.y, ped.coords.z - 1.0, ped.coords.w, true, false)
+
+				PlaceObjectOnGroundProperly(model)
+				FreezeEntityPosition(model, true)
+				SetEntityInvincible(model, true)
+				SetBlockingOfNonTemporaryEvents(model, true)
+				models[#models+1] = model
+			end
+		end
+	end
+
+	for _,rentals in pairs(config.BoatRentals) do
+		if rentals.blip then
+			local blip = AddBlipForCoord(rentals.coords.x, rentals.coords.y, rentals.coords.z)
+
+			SetBlipSprite(blip, rentals.sprite)
+			SetBlipDisplay(blip, 4)
+			SetBlipScale(blip, rentals.scale)
+			SetBlipColour(blip, rentals.color)
+			SetBlipAsShortRange(blip, true)
 			BeginTextCommandSetBlipName("STRING")
-			AddTextComponentString(v.name)
-			EndTextCommandSetBlipName(blips[k])
+			AddTextComponentString(rentals.name)
+			EndTextCommandSetBlipName(blip)
+			blips[#blips+1] = blip
+		end
+
+		if rentals.npc then
+			RequestModel(GetHashKey(rentals.ped.model))
+
+			while not HasModelLoaded(GetHashKey(rentals.ped.model)) do
+				Wait(1)
+			end
+
+			local model = CreatePed(2, GetHashKey(rentals.ped.model), rentals.ped.coords.x, rentals.ped.coords.y, rentals.ped.coords.z - 1.0, rentals.ped.coords.w, true, false)
+
+			PlaceObjectOnGroundProperly(model)
+			FreezeEntityPosition(model, true)
+			SetEntityInvincible(model, true)
+			SetBlockingOfNonTemporaryEvents(model, true)
+			models[#models+1] = model
 		end
 	end
 end
@@ -276,7 +219,18 @@ end
 AddEventHandler('onResourceStart', function(resource)
 	if resource == GetCurrentResourceName() then
 		Wait(100)
-		print("blips", blips[k])
-		RemoveBlip(blips[k])
+		placePoints()
+	end
+end)
+
+AddEventHandler('onResourceStop', function(resource)
+	if resource == GetCurrentResourceName() then
+		for k,v in pairs(blips) do
+			RemoveBlip(k)
+		end
+		
+		for k,v in pairs(models) do
+			DeletePed(v)
+		end
 	end
 end)
