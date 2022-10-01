@@ -12,8 +12,6 @@ Config = {
 	TurtleChance = 75, -- Chance to catch a turtle if using the correct bait
 	BreakChance = 94, -- If number is greater than this number, line will break
 
-	UseTarget = true, -- True is you are using qb-target
-
 	SalesLocations = {
 		Fish = {
 			blip = true,
@@ -63,12 +61,11 @@ Config = {
 		chumash = {
 			blip = true,
 			coords = vector3(-3420.34, 955.38, 8.35),
+			boatCoords = vector4(-3420.46, 945.87, -0.1, 93.84),
 			sprite = 427,
 			color = 3,
 			scale = 1.0,
 			name = "Boat Rental",
-			npc = true,
-			ped = {model = "A_M_O_Beach_02", coords = vector4(-3420.34, 955.38, 8.35, 183.25)},
 		}
 	},
 
@@ -76,7 +73,7 @@ Config = {
 	EmergencyJobs = {"police", "ambulance"}, -- Add Jobs here that will get a free boat
 
 	RentalBoats = {
-		citizens = {
+		Citizens = {
 			"dinghy",
 			"suntrap",
 			"jetmax",
@@ -86,7 +83,7 @@ Config = {
 			"speeder",
 			"squalo"
 		},
-		emergency = {
+		Emergency = {
 			"predator",
 			"seashark2"
 		}
@@ -99,6 +96,7 @@ Config = {
 		furthershore = "You need to walk further from shore",
 		tookbait = "The fish took the bait",
 		menuheader = "Rental Boats",
+		alreadyvehicle = "You already have a boat out",
 		closemenu = "⬅ Close Menu",
 		brokeline = "The fish was too large and broke your line...",
 		canthold = "You can't hold anymore ",
@@ -111,6 +109,7 @@ Config = {
 		sellingsharks = "Selling Sharks",
 		nofishsell = "You don't have any fish to sell",
 		noturtlesell = "You don't have any turtles to sell",
-		nosharksell = "You don't have any sharks to sell"
+		nosharksell = "You don't have any sharks to sell",
+		boat_rental = "[E] Boat Rentals"
 	}
 }
