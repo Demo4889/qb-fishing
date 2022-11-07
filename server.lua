@@ -1,4 +1,4 @@
-QBCore = exports['qb-core']:GetCoreObject()
+local QBCore = exports['qb-core']:GetCoreObject()
 
 QBCore.Functions.CreateUseableItem(Config.FishBait, function(source)
 	local Player = QBCore.Functions.GetPlayer(source)
